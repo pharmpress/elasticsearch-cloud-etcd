@@ -14,7 +14,7 @@
  * Contributors:
  *     * Damien Metzler <dmetzler@nuxeo.com>
  */
-package org.elasticsearch.discovery.etcd;
+package org.elasticsearch.discovery.zen;
 
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.ClusterName;
@@ -24,6 +24,7 @@ import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.discovery.DiscoverySettings;
+import org.elasticsearch.discovery.etcd.EtcdUnicastHostsProvider;
 import org.elasticsearch.discovery.zen.ZenDiscovery;
 import org.elasticsearch.discovery.zen.elect.ElectMasterService;
 import org.elasticsearch.discovery.zen.ping.ZenPing;
@@ -35,6 +36,7 @@ import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.TransportService;
 
 public class EtcdDiscovery extends ZenDiscovery {
+
 
     @Inject
     public EtcdDiscovery(Settings settings, ClusterName clusterName,

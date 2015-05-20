@@ -30,7 +30,7 @@ import org.elasticsearch.discovery.zen.ping.unicast.UnicastZenPing;
 import org.elasticsearch.plugin.cloud.etcd.EtcdServiceImpl;
 import org.elasticsearch.plugin.cloud.etcd.Location;
 import org.elasticsearch.transport.TransportService;
-
+//org.elasticsearch.discovery.zen.ZenDiscoveryTests
 public class EtcdUnicastHostsProvider extends AbstractComponent implements
         UnicastHostsProvider {
 
@@ -51,7 +51,7 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
     public List<DiscoveryNode> buildDynamicNodes() {
         List<DiscoveryNode> nodes = new ArrayList<>();
         try {
-            for (Location location : etcdService.transports()) {
+             for (Location location : etcdService.transports()) {
                 TransportAddress[] addresses = transportService.addressesFromString(location.toAdress());
                 for (int i = 0; (i < addresses.length && i < UnicastZenPing.LIMIT_PORTS_COUNT); i++) {
                     nodes.add(new DiscoveryNode("#cloud-" + location.id + "-" + i, addresses[i],
@@ -60,6 +60,7 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
             }
             return nodes;
         } catch (Exception e) {
+            logger.warn("etcdService error", e);
             return nodes;
         }
     }

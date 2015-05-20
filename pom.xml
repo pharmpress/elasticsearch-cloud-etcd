@@ -230,6 +230,12 @@
       <groupId>org.elasticsearch</groupId>
       <artifactId>elasticsearch</artifactId>
       <version>${elasticsearch.version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.apache.lucene</groupId>
+                <artifactId>lucene-core</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>

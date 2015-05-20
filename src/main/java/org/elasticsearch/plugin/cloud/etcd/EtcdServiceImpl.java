@@ -21,6 +21,30 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 public class EtcdServiceImpl extends
         AbstractLifecycleComponent<EtcdServiceImpl> implements EtcdService {
 
+    private static class EtcdNode {
+        String key;
+        long createdIndex;
+        long modifiedIndex;
+        String value;
+        String expiration;
+        int ttl;
+        boolean dir;
+        List<EtcdNode> nodes;
+    }
+
+
+    private static class EtcdResult {
+        String action;
+        EtcdNode node;
+        EtcdNode prevNode;
+        List<EtcdNode> nodes;
+        int errorCode;
+        String message;
+        String cause;
+        int index;
+    }
+
+
     private String etcdHost;
 
     private String etcdKey;
