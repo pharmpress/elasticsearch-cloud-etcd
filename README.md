@@ -19,12 +19,11 @@ Let's say you have this configuration stored in etcd :
 With this elasticsearch configuration : 
 
 ```yaml
-  cloud:
-      etcd:
-          host: http://localhost:4001
-          key: /services/<<myclustername>>
-  discovery:
-          type: etcd
+  discovery.type: etcd
+  cloud.enabled: true
+  cloud.etcd.host: http://localhost:4001
+  cloud.etcd.key: /services/<<myclustername>>
+  logger.discovery : debug
 ```
 
 Then elasticsearch will use unicast discovery and try to connect to the other nodes using the transport addresses set in etcd. 
