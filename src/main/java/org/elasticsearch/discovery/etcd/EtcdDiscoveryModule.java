@@ -17,7 +17,6 @@
 package org.elasticsearch.discovery.etcd;
 
 import org.elasticsearch.discovery.Discovery;
-import org.elasticsearch.discovery.zen.EtcdDiscovery;
 import org.elasticsearch.discovery.zen.ZenDiscoveryModule;
 
 /**

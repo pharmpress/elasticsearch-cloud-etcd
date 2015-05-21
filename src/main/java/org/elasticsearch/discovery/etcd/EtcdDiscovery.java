@@ -14,7 +14,7 @@
  * Contributors:
  *     * Damien Metzler <dmetzler@nuxeo.com>
  */
-package org.elasticsearch.discovery.zen;
+package org.elasticsearch.discovery.etcd;
 
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.ClusterName;
