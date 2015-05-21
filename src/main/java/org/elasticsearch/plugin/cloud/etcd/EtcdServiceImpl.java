@@ -105,14 +105,16 @@ public class EtcdServiceImpl extends
             EtcdResult result = mapper.readValue(
                     content, EtcdResult.class);
 
-            if (result.node.nodes != null && !result.node.nodes.isEmpty()) {
+            if (result.node != null && result.node.nodes != null && !result.node.nodes.isEmpty()) {
                 for (EtcdNode node : result.node.nodes) {
                     String serviceKey = node.key;
                     String id = serviceKey.substring(serviceKey.lastIndexOf("/") + 1);
-                    for (EtcdNode subnode : node.nodes) {
-                        if ((serviceKey + "/transport").equals(subnode.key)) {
-                            if (subnode.value != null && !subnode.value.isEmpty()) {
-                                locations.add(new LocationImpl(subnode.value, id));
+                    if(node.nodes != null) {
+                        for (EtcdNode subnode : node.nodes) {
+                            if ((serviceKey + "/transport").equals(subnode.key)) {
+                                if (subnode.value != null && !subnode.value.isEmpty()) {
+                                    locations.add(new LocationImpl(subnode.value, id));
+                                }
                             }
                         }
                     }
