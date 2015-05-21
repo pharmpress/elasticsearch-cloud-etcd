@@ -16,9 +16,6 @@
  */
 package org.elasticsearch.discovery.etcd;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.component.AbstractComponent;
@@ -27,9 +24,12 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastHostsProvider;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastZenPing;
-import org.elasticsearch.plugin.cloud.etcd.EtcdServiceImpl;
 import org.elasticsearch.plugin.cloud.etcd.EtcdService.Location;
+import org.elasticsearch.plugin.cloud.etcd.EtcdServiceImpl;
 import org.elasticsearch.transport.TransportService;
+
+import java.util.ArrayList;
+import java.util.List;
 //org.elasticsearch.discovery.zen.ZenDiscoveryTests
 public class EtcdUnicastHostsProvider extends AbstractComponent implements
         UnicastHostsProvider {
@@ -59,8 +59,12 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
                 }
             }
             return nodes;
+//        } catch (ClientHandlerException e){
+//            logger.trace("etcd connnection failed: " + etcdService.getEtcdHost());
+//            return nodes;
         } catch (Exception e) {
-            logger.warn("etcdService error", e);
+            logger.warn("etcdService error :" + e.getMessage());
+            logger.trace("etcdService error", e);
             return nodes;
         }
     }

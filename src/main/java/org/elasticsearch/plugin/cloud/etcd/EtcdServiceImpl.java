@@ -1,26 +1,20 @@
 package org.elasticsearch.plugin.cloud.etcd;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.common.component.AbstractLifecycleComponent;
-import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.settings.SettingsFilter;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.common.component.AbstractLifecycleComponent;
+import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.SettingsFilter;
+
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EtcdServiceImpl extends
         AbstractLifecycleComponent<EtcdServiceImpl> implements EtcdService {
@@ -71,11 +65,21 @@ public class EtcdServiceImpl extends
 
     private String etcdKey;
 
+
     @Inject
     public EtcdServiceImpl(Settings settings, SettingsFilter settingsFilter) {
         super(settings);
-        etcdHost = settings.get("cloud.etcd.host","http://127.0.0.1:4001");
-        etcdKey = settings.get("cloud.etcd.key","/services/elasticsearch");
+        if(System.getenv().containsKey("ETCDCTL_PEERS")){
+            etcdHost = System.getenv().get("ETCDCTL_PEERS");
+        } else {
+            etcdHost = settings.get("cloud.etcd.host", System.getProperty("cloud.etcd.host", "127.0.0.1:4001"));
+        }
+
+        etcdKey = settings.get("cloud.etcd.key", System.getProperty("cloud.etcd.key", "/services/elasticsearch"));
+    }
+
+    public String getEtcdHost() {
+        return etcdHost;
     }
 
     @Override
@@ -84,7 +88,7 @@ public class EtcdServiceImpl extends
 
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
-        WebResource service = client.resource(String.format("%s/v2/keys",
+        WebResource service = client.resource(String.format("http://%s/v2/keys",
                 etcdHost));
 
         ClientResponse response = service.path(etcdKey).queryParam("recursive", "true").get(
@@ -99,19 +103,19 @@ public class EtcdServiceImpl extends
         try {
             ObjectMapper mapper = new ObjectMapper();
             java.util.Scanner s = new java.util.Scanner(response.getEntityInputStream()).useDelimiter("\\A");
-            if(s.hasNext()){
+            if (s.hasNext()) {
                 content = s.next();
             }
             EtcdResult result = mapper.readValue(
                     content, EtcdResult.class);
 
-            if(result.node.nodes != null && !result.node.nodes.isEmpty()) {
-                for(EtcdNode node : result.node.nodes) {
+            if (result.node.nodes != null && !result.node.nodes.isEmpty()) {
+                for (EtcdNode node : result.node.nodes) {
                     String serviceKey = node.key;
                     String id = serviceKey.substring(serviceKey.lastIndexOf("/") + 1);
-                    for( EtcdNode subnode : node.nodes) {
-                        if((serviceKey + "/transport").equals(subnode.key)) {
-                            if(subnode.value != null && !subnode.value.isEmpty()) {
+                    for (EtcdNode subnode : node.nodes) {
+                        if ((serviceKey + "/transport").equals(subnode.key)) {
+                            if (subnode.value != null && !subnode.value.isEmpty()) {
                                 locations.add(new LocationImpl(subnode.value, id));
                             }
                         }
