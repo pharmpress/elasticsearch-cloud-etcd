@@ -59,9 +59,6 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
                 }
             }
             return nodes;
-//        } catch (ClientHandlerException e){
-//            logger.trace("etcd connnection failed: " + etcdService.getEtcdHost());
-//            return nodes;
         } catch (Exception e) {
             logger.warn("etcdService error :" + e.getMessage());
             logger.trace("etcdService error", e);

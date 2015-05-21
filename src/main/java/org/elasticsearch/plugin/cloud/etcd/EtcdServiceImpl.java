@@ -72,14 +72,10 @@ public class EtcdServiceImpl extends
         if(System.getenv().containsKey("ETCDCTL_PEERS")){
             etcdHost = System.getenv().get("ETCDCTL_PEERS");
         } else {
-            etcdHost = settings.get("cloud.etcd.host", System.getProperty("cloud.etcd.host", "127.0.0.1:4001"));
+            etcdHost = settings.get("cloud.etcd.host", "127.0.0.1:4001");
         }
 
-        etcdKey = settings.get("cloud.etcd.key", System.getProperty("cloud.etcd.key", "/services/elasticsearch"));
-    }
-
-    public String getEtcdHost() {
-        return etcdHost;
+        etcdKey = settings.get("cloud.etcd.key", "/services/elasticsearch");
     }
 
     @Override
