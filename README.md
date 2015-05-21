@@ -12,9 +12,9 @@ The purpose of that plugin is to discover the transport adresses of the other El
 
 Let's say you have this configuration stored in etcd :
 
-	/services/<<myclustername>>/1/transport: {"host":"127.0.0.1","port":9300} 
-	/services/<<myclustername>>/2/transport: {"host":"127.0.0.1","port":9301}
-	/services/<<myclustername>>/3/transport: {"host":"127.0.0.1","port":9302} 
+	/services/<<myclustername>>/1/transport: 127.0.0.1:9300
+	/services/<<myclustername>>/2/transport: 127.0.0.1:9301
+	/services/<<myclustername>>/3/transport: 127.0.0.1:9302
 
 With this elasticsearch configuration : 
 
