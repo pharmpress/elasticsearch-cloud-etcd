@@ -28,7 +28,7 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastHostsProvider;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastZenPing;
 import org.elasticsearch.plugin.cloud.etcd.EtcdServiceImpl;
-import org.elasticsearch.plugin.cloud.etcd.Location;
+import org.elasticsearch.plugin.cloud.etcd.EtcdService.Location;
 import org.elasticsearch.transport.TransportService;
 //org.elasticsearch.discovery.zen.ZenDiscoveryTests
 public class EtcdUnicastHostsProvider extends AbstractComponent implements
@@ -52,9 +52,9 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
         List<DiscoveryNode> nodes = new ArrayList<>();
         try {
              for (Location location : etcdService.transports()) {
-                TransportAddress[] addresses = transportService.addressesFromString(location.toAdress());
+                TransportAddress[] addresses = transportService.addressesFromString(location.getAddress());
                 for (int i = 0; (i < addresses.length && i < UnicastZenPing.LIMIT_PORTS_COUNT); i++) {
-                    nodes.add(new DiscoveryNode("#cloud-" + location.id + "-" + i, addresses[i],
+                    nodes.add(new DiscoveryNode("#cloud-" + location.getId() + "-" + i, addresses[i],
                             Version.CURRENT));
                 }
             }

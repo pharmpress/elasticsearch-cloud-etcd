@@ -45,6 +45,7 @@ import static org.hamcrest.Matchers.*;
 public class CloudEtcdPluginTest extends ElasticsearchIntegrationTest {
 
     @Test
+    @Ignore
     public void testChangeRejoinOnMasterOptionIsDynamic() throws Exception {
         Settings nodeSettings = ImmutableSettings.settingsBuilder()
                 .put("discovery.type", "etcd") // <-- To override the local setting if set externally
@@ -113,12 +114,13 @@ public class CloudEtcdPluginTest extends ElasticsearchIntegrationTest {
     }
 
     @Test
+    @Ignore
     @TestLogging(value = "action.admin.cluster.health:TRACE")
     public void testNodeFailuresAreProcessedOnce() throws ExecutionException, InterruptedException, IOException {
         Settings defaultSettings = ImmutableSettings.builder()
                 .put(FaultDetection.SETTING_PING_TIMEOUT, "1s")
                 .put(FaultDetection.SETTING_PING_RETRIES, "1")
-                .put("discovery.type", "zen")
+                .put("discovery.type", "etcd")
                 .build();
 
         Settings masterNodeSettings = ImmutableSettings.builder()

@@ -20,6 +20,8 @@ import org.elasticsearch.Version;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.ClusterService;
 import org.elasticsearch.cluster.node.DiscoveryNodeService;
+import org.elasticsearch.cluster.settings.ClusterDynamicSettings;
+import org.elasticsearch.cluster.settings.DynamicSettings;
 import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
@@ -44,11 +46,11 @@ public class EtcdDiscovery extends ZenDiscovery {
             ClusterService clusterService,
             NodeSettingsService nodeSettingsService,
             DiscoveryNodeService discoveryNodeService,
-            ZenPingService pingService,// Version version,
+            ZenPingService pingService, ElectMasterService electMasterService, // Version version,
             DiscoverySettings discoverySettings, EtcdServiceImpl etcdService) {
         super(settings, clusterName, threadPool, transportService,
                 clusterService, nodeSettingsService, discoveryNodeService,
-                pingService, new ElectMasterService(settings), discoverySettings);
+                pingService, electMasterService, discoverySettings);
 
         if (settings.getAsBoolean("cloud.enabled", true)) {
             ImmutableList<? extends ZenPing> zenPings = pingService.zenPings();

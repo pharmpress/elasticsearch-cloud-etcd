@@ -25,6 +25,13 @@ import java.util.List;
  */
 public interface EtcdService {
 
+    interface Location{
+        String getAddress();
+
+        String getId();
+    }
 
     public List<Location> transports();
+
+
 }

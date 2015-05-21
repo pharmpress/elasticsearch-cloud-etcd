@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.plugin.cloud.etcd.EtcdService;
-import org.elasticsearch.plugin.cloud.etcd.Location;
+import org.elasticsearch.plugin.cloud.etcd.EtcdService.Location;
 
 public class TestEtcdService implements EtcdService {
 
