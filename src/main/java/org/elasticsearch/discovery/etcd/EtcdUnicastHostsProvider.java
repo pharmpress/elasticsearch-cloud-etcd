@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -32,13 +31,11 @@ import org.elasticsearch.discovery.zen.ping.unicast.UnicastHostsProvider;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastZenPing;
 import org.elasticsearch.transport.TransportService;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
-//org.elasticsearch.discovery.zen.ZenDiscoveryTests
-public class EtcdUnicastHostsProvider extends AbstractComponent implements
-        UnicastHostsProvider {
+public class EtcdUnicastHostsProvider extends AbstractComponent implements UnicastHostsProvider {
     public static class EtcdNode {
         public String key;
         public long createdIndex;
@@ -46,10 +43,9 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
         public String value;
         public String expiration;
         public int ttl;
-        public boolean dir;
+        public boolean dir = false;
         public List<EtcdNode> nodes;
     }
-
 
     public static class EtcdResult {
         public String action;
@@ -82,11 +78,9 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
 
     private TransportService transportService;
 
-
     private String etcdHost;
 
     private String etcdKey;
-
 
     @Inject
     public EtcdUnicastHostsProvider(Settings settings, TransportService transportService) {
@@ -97,7 +91,6 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
         } else {
             etcdHost = settings.get("cloud.etcd.host", "127.0.0.1:4001");
         }
-
         etcdKey = settings.get("cloud.etcd.key", "/services/elasticsearch");
     }
 
@@ -107,8 +100,8 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
         try {
             for (Location location : transports()) {
                 TransportAddress[] addresses = transportService.addressesFromString(location.getAddress());
-                logger.trace("adding {}, transport_address {}", location.getAddress(), addresses[0]);
                 for (int i = 0; (i < addresses.length && i < UnicastZenPing.LIMIT_PORTS_COUNT); i++) {
+                    logger.trace("adding {}, transport_address {}", location.getAddress(), addresses[i]);
                     nodes.add(new DiscoveryNode("#cloud-" + location.getId() + "-" + i, addresses[i], Version.CURRENT));
                 }
             }
@@ -120,55 +113,47 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
         }
     }
 
-
     public List<Location> transports() {
         List<Location> locations = new ArrayList<>();
-        ClientConfig config = new DefaultClientConfig();
-        Client client = Client.create(config);
-        WebResource service = client.resource(String.format("http://%s/v2/keys", etcdHost));
-
+        WebResource service = Client.create(new DefaultClientConfig()).resource(String.format("http://%s/v2/keys", etcdHost));
         ClientResponse response = service.path(etcdKey).queryParam("recursive", "true").get(ClientResponse.class);
+        ClientResponse.Status status = response.getClientResponseStatus();
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()
-                && response.getStatus() != Response.Status.NOT_FOUND.getStatusCode()) {
-            logger.error("Error when fetching etcd");
-        }
+        if (status != ClientResponse.Status.OK && status != ClientResponse.Status.NOT_FOUND) {
+            logger.error(String.format("Error when fetching etcd[%d]: %s", status.getStatusCode(), status.toString()));
+        } else {
+            String content = "";
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Scanner s = new Scanner(response.getEntityInputStream()).useDelimiter("\\A");
+                if (s.hasNext()) {
+                    content = s.next();
+                }
+                EtcdResult result = mapper.readValue(content, EtcdResult.class);
 
-        String content = "";
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            java.util.Scanner s = new java.util.Scanner(response.getEntityInputStream()).useDelimiter("\\A");
-            if (s.hasNext()) {
-                content = s.next();
-            }
-            EtcdResult result = mapper.readValue(content, EtcdResult.class);
-
-            if (result.node != null && result.node.nodes != null && !result.node.nodes.isEmpty()) {
-                for (EtcdNode node : result.node.nodes) {
-                    String serviceKey = node.key;
-                    String id = serviceKey.substring(serviceKey.lastIndexOf("/") + 1);
-                    if (node.nodes != null) {
-                        for (EtcdNode subnode : node.nodes) {
-                            if ((serviceKey + "/transport").equals(subnode.key)) {
-                                if (subnode.value != null && !subnode.value.isEmpty()) {
+                if (result.node != null && result.node.nodes != null && !result.node.nodes.isEmpty()) {
+                    for (EtcdNode node : result.node.nodes) {
+                        String serviceKey = node.key;
+                        String id = serviceKey.substring(serviceKey.lastIndexOf("/") + 1);
+                        if (node.dir && node.nodes != null) {
+                            for (EtcdNode subnode : node.nodes) {
+                                if ((serviceKey + "/transport").equals(subnode.key) && subnode.value != null && !subnode.value.isEmpty()) {
                                     locations.add(new Location(subnode.value, id));
                                 }
                             }
+                        } else if(node.value != null){
+                            locations.add(new Location(node.value, id));
                         }
                     }
+                } else if (result.errorCode != 0) {
+                    logger.warn(String.format("Error[%d] %s : %s", result.errorCode, result.message, result.cause));
+                } else {
+                    logger.info("Empty response from etcd");
                 }
-            } else if (result.errorCode != 0) {
-                logger.warn(String.format("Error[%d] %s : %s", result.errorCode, result.message, result.cause));
-            } else {
-                logger.info("Empty response from etcd");
+            } catch (Exception e) {
+                logger.error(String.format("Response error from etcd with content:[%s]", content), e);
             }
-            return locations;
-        } catch (Exception e) {
-            logger.error(String.format("Response error from etcd with content:[%s]", content), e);
-            return locations;
         }
-
+        return locations;
     }
-
-
 }

@@ -16,14 +16,14 @@
  */
 package org.elasticsearch.cloud.etcd;
 
-import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder;
-
 import org.elasticsearch.cloud.etcd.AbstractEtcdTest.EtcdTest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.PluginsService;
 import org.elasticsearch.test.ElasticsearchIntegrationTest.ClusterScope;
 import org.elasticsearch.test.ElasticsearchIntegrationTest.Scope;
 import org.junit.Test;
+
+import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilder;
 
 @EtcdTest
 @ClusterScope(scope = Scope.TEST, numDataNodes = 0, numClientNodes = 0, transportClientRatio = 0.0)
@@ -32,11 +32,11 @@ public class EtcdDiscoveryITest extends AbstractEtcdTest {
     @Test
     public void startTest() throws Exception {
         Settings nodeSettings = settingsBuilder() //
-        .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true) //
-        .put("cloud.enabled", true) //
-        .put("discovery.type", "etcd") //
-        //.put(EtcdModule.ETCD_SERVICE_TYPE_KEY, TestEtcdService.class)//
-        .build();
+                .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true) //
+                .put("cloud.enabled", true) //
+                .put("discovery.type", "etcd") //
+                        //.put(EtcdModule.ETCD_SERVICE_TYPE_KEY, TestEtcdService.class)//
+                .build();
         internalCluster().startNode(nodeSettings);
     }
 }

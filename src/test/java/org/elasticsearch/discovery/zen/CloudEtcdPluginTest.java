@@ -11,7 +11,6 @@ import org.elasticsearch.common.Priority;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.discovery.Discovery;
-import org.elasticsearch.discovery.etcd.EtcdDiscovery;
 import org.elasticsearch.discovery.zen.fd.FaultDetection;
 import org.elasticsearch.plugins.PluginsService;
 import org.elasticsearch.test.ElasticsearchIntegrationTest;
@@ -39,13 +38,16 @@ public class CloudEtcdPluginTest extends ElasticsearchIntegrationTest {
                 .put("discovery.type", "etcd") // <-- To override the local setting if set externally
                 .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true) //
                 .put("cloud.enabled", true) //
+                .put("cloud.etcd.key","/domains/elasticsearch/discovery")
+                .put("es.logger.discovery", "trace")
                 .build();
         String nodeName = internalCluster().startNode(nodeSettings);
         //EtcdDiscovery zenDiscovery = (EtcdDiscovery)
 
         Discovery discovery = internalCluster().getInstance(Discovery.class, nodeName);
-        assertTrue(discovery instanceof EtcdDiscovery);
-
+        assertTrue(discovery instanceof ZenDiscovery);
+        //ClusterService clusterservice = internalCluster().getInstance(ClusterService.class, nodeName);
+        //clusterservice.state().nodes().
         //assertThat(zenDiscovery.isRejoinOnMasterGone(), is(true));
 
         client().admin().cluster().prepareUpdateSettings()

@@ -16,11 +16,7 @@
  */
 package org.elasticsearch.cloud.etcd;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
+import com.carrotsearch.randomizedtesting.annotations.TestGroup;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
@@ -29,7 +25,10 @@ import org.elasticsearch.env.FailedToResolveConfigException;
 import org.elasticsearch.plugins.PluginsService;
 import org.elasticsearch.test.ElasticsearchIntegrationTest;
 
-import com.carrotsearch.randomizedtesting.annotations.TestGroup;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class AbstractEtcdTest extends ElasticsearchIntegrationTest {
 
@@ -46,10 +45,10 @@ public class AbstractEtcdTest extends ElasticsearchIntegrationTest {
 
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
-                ImmutableSettings.Builder settings = ImmutableSettings.builder()
+        ImmutableSettings.Builder settings = ImmutableSettings.builder()
                 .put(super.nodeSettings(nodeOrdinal))
                 .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true);
-                //.put(EtcdModule.ETCD_SERVICE_TYPE_KEY, TestEtcdService.class);
+        //.put(EtcdModule.ETCD_SERVICE_TYPE_KEY, TestEtcdService.class);
 
         Environment environment = new Environment();
 
