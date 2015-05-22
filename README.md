@@ -16,6 +16,12 @@ Let's say you have this configuration stored in etcd :
 	/services/<<myclustername>>/2/transport: 127.0.0.1:9301
 	/services/<<myclustername>>/3/transport: 127.0.0.1:9302
 
+or :
+
+	/services/<<myclustername>>/1: 127.0.0.1:9300
+	/services/<<myclustername>>/2: 127.0.0.1:9301
+	/services/<<myclustername>>/3: 127.0.0.1:9302
+
 With this elasticsearch configuration : 
 
 ```yaml
