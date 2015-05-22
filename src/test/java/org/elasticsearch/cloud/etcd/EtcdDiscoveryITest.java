@@ -20,7 +20,6 @@ import static org.elasticsearch.common.settings.ImmutableSettings.settingsBuilde
 
 import org.elasticsearch.cloud.etcd.AbstractEtcdTest.EtcdTest;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.plugin.cloud.etcd.EtcdModule;
 import org.elasticsearch.plugins.PluginsService;
 import org.elasticsearch.test.ElasticsearchIntegrationTest.ClusterScope;
 import org.elasticsearch.test.ElasticsearchIntegrationTest.Scope;
@@ -36,7 +35,7 @@ public class EtcdDiscoveryITest extends AbstractEtcdTest {
         .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true) //
         .put("cloud.enabled", true) //
         .put("discovery.type", "etcd") //
-        .put(EtcdModule.ETCD_SERVICE_TYPE_KEY, TestEtcdService.class)//
+        //.put(EtcdModule.ETCD_SERVICE_TYPE_KEY, TestEtcdService.class)//
         .build();
         internalCluster().startNode(nodeSettings);
     }

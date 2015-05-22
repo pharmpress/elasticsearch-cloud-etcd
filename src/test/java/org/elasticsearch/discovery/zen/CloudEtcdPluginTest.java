@@ -34,7 +34,6 @@ import static org.hamcrest.Matchers.*;
 public class CloudEtcdPluginTest extends ElasticsearchIntegrationTest {
 
     @Test
-    @Ignore
     public void testChangeRejoinOnMasterOptionIsDynamic() throws Exception {
         Settings nodeSettings = ImmutableSettings.settingsBuilder()
                 .put("discovery.type", "etcd") // <-- To override the local setting if set externally
@@ -42,7 +41,11 @@ public class CloudEtcdPluginTest extends ElasticsearchIntegrationTest {
                 .put("cloud.enabled", true) //
                 .build();
         String nodeName = internalCluster().startNode(nodeSettings);
-        EtcdDiscovery zenDiscovery = (EtcdDiscovery) internalCluster().getInstance(Discovery.class, nodeName);
+        //EtcdDiscovery zenDiscovery = (EtcdDiscovery)
+
+        Discovery discovery = internalCluster().getInstance(Discovery.class, nodeName);
+        assertTrue(discovery instanceof EtcdDiscovery);
+
         //assertThat(zenDiscovery.isRejoinOnMasterGone(), is(true));
 
         client().admin().cluster().prepareUpdateSettings()

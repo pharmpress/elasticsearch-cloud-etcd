@@ -26,7 +26,6 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.FailedToResolveConfigException;
-import org.elasticsearch.plugin.cloud.etcd.EtcdModule;
 import org.elasticsearch.plugins.PluginsService;
 import org.elasticsearch.test.ElasticsearchIntegrationTest;
 
@@ -49,8 +48,8 @@ public class AbstractEtcdTest extends ElasticsearchIntegrationTest {
     protected Settings nodeSettings(int nodeOrdinal) {
                 ImmutableSettings.Builder settings = ImmutableSettings.builder()
                 .put(super.nodeSettings(nodeOrdinal))
-                .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true)
-                .put(EtcdModule.ETCD_SERVICE_TYPE_KEY, TestEtcdService.class);
+                .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true);
+                //.put(EtcdModule.ETCD_SERVICE_TYPE_KEY, TestEtcdService.class);
 
         Environment environment = new Environment();
 

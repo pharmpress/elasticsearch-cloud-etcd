@@ -16,6 +16,12 @@
  */
 package org.elasticsearch.discovery.etcd;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
 import org.elasticsearch.Version;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.component.AbstractComponent;
@@ -24,38 +30,86 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastHostsProvider;
 import org.elasticsearch.discovery.zen.ping.unicast.UnicastZenPing;
-import org.elasticsearch.plugin.cloud.etcd.EtcdService.Location;
-import org.elasticsearch.plugin.cloud.etcd.EtcdServiceImpl;
 import org.elasticsearch.transport.TransportService;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+
 //org.elasticsearch.discovery.zen.ZenDiscoveryTests
 public class EtcdUnicastHostsProvider extends AbstractComponent implements
         UnicastHostsProvider {
+    public static class EtcdNode {
+        public String key;
+        public long createdIndex;
+        public long modifiedIndex;
+        public String value;
+        public String expiration;
+        public int ttl;
+        public boolean dir;
+        public List<EtcdNode> nodes;
+    }
+
+
+    public static class EtcdResult {
+        public String action;
+        public EtcdNode node;
+        public EtcdNode prevNode;
+        public List<EtcdNode> nodes;
+        public int errorCode = 0;
+        public String message;
+        public String cause;
+        public int index;
+    }
+
+    public static class Location {
+        private String address;
+        private String id;
+
+        public Location(String address, String id) {
+            this.address = address;
+            this.id = id;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public String getId() {
+            return id;
+        }
+    }
 
     private TransportService transportService;
 
-    private EtcdServiceImpl etcdService;
+
+    private String etcdHost;
+
+    private String etcdKey;
+
 
     @Inject
-    public EtcdUnicastHostsProvider(Settings settings,
-            TransportService transportService, EtcdServiceImpl etcdService) {
+    public EtcdUnicastHostsProvider(Settings settings, TransportService transportService) {
         super(settings);
         this.transportService = transportService;
-        this.etcdService = etcdService;
+        if (System.getenv().containsKey("ETCDCTL_PEERS")) {
+            etcdHost = System.getenv().get("ETCDCTL_PEERS");
+        } else {
+            etcdHost = settings.get("cloud.etcd.host", "127.0.0.1:4001");
+        }
 
+        etcdKey = settings.get("cloud.etcd.key", "/services/elasticsearch");
     }
 
     @Override
     public List<DiscoveryNode> buildDynamicNodes() {
         List<DiscoveryNode> nodes = new ArrayList<>();
         try {
-             for (Location location : etcdService.transports()) {
+            for (Location location : transports()) {
                 TransportAddress[] addresses = transportService.addressesFromString(location.getAddress());
+                logger.trace("adding {}, transport_address {}", location.getAddress(), addresses[0]);
                 for (int i = 0; (i < addresses.length && i < UnicastZenPing.LIMIT_PORTS_COUNT); i++) {
-                    nodes.add(new DiscoveryNode("#cloud-" + location.getId() + "-" + i, addresses[i],
-                            Version.CURRENT));
+                    nodes.add(new DiscoveryNode("#cloud-" + location.getId() + "-" + i, addresses[i], Version.CURRENT));
                 }
             }
             return nodes;
@@ -65,4 +119,56 @@ public class EtcdUnicastHostsProvider extends AbstractComponent implements
             return nodes;
         }
     }
+
+
+    public List<Location> transports() {
+        List<Location> locations = new ArrayList<>();
+        ClientConfig config = new DefaultClientConfig();
+        Client client = Client.create(config);
+        WebResource service = client.resource(String.format("http://%s/v2/keys", etcdHost));
+
+        ClientResponse response = service.path(etcdKey).queryParam("recursive", "true").get(ClientResponse.class);
+
+        if (response.getStatus() != Response.Status.OK.getStatusCode()
+                && response.getStatus() != Response.Status.NOT_FOUND.getStatusCode()) {
+            logger.error("Error when fetching etcd");
+        }
+
+        String content = "";
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            java.util.Scanner s = new java.util.Scanner(response.getEntityInputStream()).useDelimiter("\\A");
+            if (s.hasNext()) {
+                content = s.next();
+            }
+            EtcdResult result = mapper.readValue(content, EtcdResult.class);
+
+            if (result.node != null && result.node.nodes != null && !result.node.nodes.isEmpty()) {
+                for (EtcdNode node : result.node.nodes) {
+                    String serviceKey = node.key;
+                    String id = serviceKey.substring(serviceKey.lastIndexOf("/") + 1);
+                    if (node.nodes != null) {
+                        for (EtcdNode subnode : node.nodes) {
+                            if ((serviceKey + "/transport").equals(subnode.key)) {
+                                if (subnode.value != null && !subnode.value.isEmpty()) {
+                                    locations.add(new Location(subnode.value, id));
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (result.errorCode != 0) {
+                logger.warn(String.format("Error[%d] %s : %s", result.errorCode, result.message, result.cause));
+            } else {
+                logger.info("Empty response from etcd");
+            }
+            return locations;
+        } catch (Exception e) {
+            logger.error(String.format("Response error from etcd with content:[%s]", content), e);
+            return locations;
+        }
+
+    }
+
+
 }

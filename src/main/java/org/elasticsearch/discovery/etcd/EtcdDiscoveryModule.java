@@ -16,15 +16,17 @@
  */
 package org.elasticsearch.discovery.etcd;
 
+import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.discovery.Discovery;
 import org.elasticsearch.discovery.zen.ZenDiscoveryModule;
 
-/**
- *
- *
- * @since TODO
- */
 public class EtcdDiscoveryModule extends ZenDiscoveryModule {
+
+    @Inject
+    public EtcdDiscoveryModule(Settings settings) {
+        addUnicastHostProvider(EtcdUnicastHostsProvider.class);
+    }
 
     @Override
     protected void bindDiscovery() {
