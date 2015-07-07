@@ -1,18 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.elasticsearch</groupId>
+  <groupId>com.pharmpress</groupId>
   <artifactId>elasticsearch-cloud-etcd</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>cloud-etcd</name>
 
-  <url>https://github.com/nuxeo/elasticsearch-cloud-etcd/</url>
+  <url>https://github.com/pharmpress/elasticsearch-cloud-etcd</url>
 
-  <organization>
-    <name>Nuxeo SA</name>
-    <url>http://www.nuxeo.com</url>
-  </organization>
   <licenses>
     <license>
       <name>GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1</name>
@@ -22,17 +18,10 @@
 
 
   <scm>
-    <connection>scm:git:git@github.com:nuxeo/elasticsearch-cloud-etc.git</connection>
-    <developerConnection>scm:git:git@github.com:nuxeo/elasticsearch-cloud-etc.git
-        </developerConnection>
-    <url>http://github.com/nuxeo/elasticsearch-cloud-etcd</url>
+    <connection>scm:git:git@github.com:pharmpress/elasticsearch-cloud-etcd.git</connection>
+    <developerConnection>scm:git:git@github.com:pharmpress/elasticsearch-cloud-etcd.git</developerConnection>
+    <url>http://github.com/pharmpress/elasticsearch-cloud-etcd</url>
   </scm>
-
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
-  </parent>
 
 
   <properties>
@@ -55,6 +44,16 @@
       </resource>
     </resources>
     <plugins>
+      <plugin>
+        <groupId>de.jutzig</groupId>
+        <artifactId>github-release-plugin</artifactId>
+        <version>1.1.0</version>
+        <configuration>
+          <description>Description of your release</description>
+          <releaseName>1.0 Final</releaseName>
+          <tag>${project.version}</tag>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -243,11 +242,5 @@
       <version>1.17.1</version>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <id>sonatype</id>
-      <name>Sonatype Groups</name>
-      <url>https://oss.sonatype.org/content/groups/public/</url>
-    </repository>
-  </repositories>
+
 </project>
