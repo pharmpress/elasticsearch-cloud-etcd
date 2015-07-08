@@ -4,7 +4,7 @@
   <groupId>com.pharmpress</groupId>
   <artifactId>elasticsearch-cloud-etcd</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>2.0</version>
   <name>cloud-etcd</name>
 
   <url>https://github.com/pharmpress/elasticsearch-cloud-etcd</url>
@@ -69,8 +69,8 @@
         <artifactId>github-release-plugin</artifactId>
         <version>1.1.0</version>
         <configuration>
-          <description>Description of your release</description>
-          <releaseName>1.0 Final</releaseName>
+          <description>Tag release version ${project.version}</description>
+          <releaseName>v${project.version}</releaseName>
           <tag>${project.version}</tag>
           <artifact>${project.build.directory}/releases/${project.artifactId}-${project.version}.zip</artifact>
         </configuration>
