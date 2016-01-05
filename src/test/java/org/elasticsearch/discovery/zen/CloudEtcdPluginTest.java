@@ -33,12 +33,14 @@ import static org.hamcrest.Matchers.*;
 public class CloudEtcdPluginTest extends ElasticsearchIntegrationTest {
 
     @Test
+    @Ignore
     public void testChangeRejoinOnMasterOptionIsDynamic() throws Exception {
         Settings nodeSettings = ImmutableSettings.settingsBuilder()
                 .put("discovery.type", "etcd") // <-- To override the local setting if set externally
                 .put("plugins." + PluginsService.LOAD_PLUGIN_FROM_CLASSPATH, true) //
                 .put("cloud.enabled", true) //
                 .put("cloud.etcd.key","/domains/elasticsearch/discovery")
+                .put("cloud.etcd.instance.key","1")
                 .put("es.logger.discovery", "trace")
                 .build();
         String nodeName = internalCluster().startNode(nodeSettings);
