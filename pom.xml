@@ -4,7 +4,7 @@
   <groupId>com.pharmpress</groupId>
   <artifactId>elasticsearch-cloud-etcd</artifactId>
   <packaging>jar</packaging>
-  <version>2.1</version>
+  <version>2.2-SNAPSHOT</version>
   <name>cloud-etcd</name>
 
   <url>https://github.com/pharmpress/elasticsearch-cloud-etcd</url>
